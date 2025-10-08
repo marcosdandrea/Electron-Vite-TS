@@ -2,20 +2,19 @@
   "appId": "com.marcosdandrea.boilerplate",
   "productName": "Boilerplate",
   "files": ["dist-electron", "dist-react"],
-  "extraResources": ["dist-electron/preload.cjs"],
-  "icon": "./resources/AS_icon.ico",
+  "icon": "./resources/icon/icon.ico",
   "asar": true,
   "mac": {
-    "icon": "./resources/AS_icon.icns",
+    "icon": "./resources/icon/icon.icns",
     "target": "dmg"
   },
   "linux": {
-    "icon": "./resources/AS_icon.png",
+    "icon": "./resources/icon/icon.png",
     "target": "AppImage",
     "category": "Utility"
   },
   "win": {
-    "icon": "./resources/AS_icon.ico",
+    "icon": "./resources/icon/icon.ico",
     "target": ["portable", "msi"]
   }
 }

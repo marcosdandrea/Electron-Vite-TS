@@ -1,18 +1,24 @@
 import path from 'path';
-import { app } from 'electron';
-import { isDev } from '@utils/index.js';
-import { pathToFileURL } from 'url';
 
+const isDev = process.env.NODE_ENV === 'development'
+const isHeadless = process.env.HEADLESS === 'true'
 
-export function getPreloadPath() {
-  return path.join(app.getAppPath(), isDev() ? '.' : '..', 'dist-app/app/src/utils/preload.cjs');
+const getAppPath = async () => {
+  if (isHeadless) {
+    return process.cwd();
+  } else {
+    const { app } = await import('electron');
+    return app.getAppPath();    
+  }
 }
 
-export function getUIPath() {
-  const filePath = path.join(app.getAppPath(), 'dist-react', 'index.html');
-  return pathToFileURL(filePath).toString();
+export async function getStaticDir() {
+  const appPath = await getAppPath();
+  // Tanto en modo headless como Electron usamos dist-react
+  return path.join(appPath, 'dist-react');
 }
 
-export function getAssetPath() {
-  return path.join(app.getAppPath(), isDev() ? '.' : '..', '/src/assets');
+export async function getAssetPath() {
+  const appPath = await getAppPath();
+  return path.join(appPath, isDev ? '.' : '..', '/src/assets');
 }

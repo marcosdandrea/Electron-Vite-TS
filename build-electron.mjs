@@ -2,8 +2,7 @@ import { build } from 'esbuild';
 
 build({
     entryPoints: {
-        main: 'src/app/main.ts',
-        preload: 'src/app/src/domain/useCases/windowManager/preload.ts'
+        main: 'src/app/main.ts'
     },
     outdir: 'dist-electron',
     entryNames: '[name]',

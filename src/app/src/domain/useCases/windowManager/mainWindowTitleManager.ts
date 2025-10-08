@@ -1,4 +1,3 @@
-import App from "@src/domain/entities/app/index.js";
 import eventManager from "@entities/eventManager/index.js";
 import { getMainWindow } from "./index.js"
 import { Log } from "@utils/log.js";
@@ -13,8 +12,6 @@ const setMainWindowTitle = (title: string) => {
 }
 
 const handleOnUpdateTitleAndMenu = () => {
-    const app = App.getInstance()
-    if (!app) return
     //do some stuff to get the title and set it next 
     setMainWindowTitle(`New App title`)
 }

@@ -1,0 +1,39 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist/headless",
+    "rootDir": "./src",
+    "declaration": false,
+    "sourceMap": false,
+    "allowImportingTsExtensions": false,
+    "baseUrl": ".",
+    "paths": {
+      "@common/*": ["./src/common/*"],
+      "@src/*": ["./src/app/src/*"],
+      "@utils/*": ["./src/app/src/utils/*"],
+      "@assets/*": ["./src/app/src/assets/*"],
+      "@domain/*": ["./src/app/src/domain/*"],
+      "@services/*": ["./src/app/src/services/*"],
+      "@entities/*": ["./src/app/src/domain/entities/*"],
+      "@useCases/*": ["./src/app/src/domain/useCases/*"]
+    }
+  },
+  "include": [
+    "src/app/**/*",
+    "src/common/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-electron",
+    "src/ui/**/*"
+  ]
+}

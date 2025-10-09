@@ -25,7 +25,8 @@
     "dist:win": "npm run clean:dist && npm run transpile:electron && npm run build:vite && electron-builder --win --x64",
     "dist:linux": "npm run clean:dist && npm run transpile:electron && npm run build:vite && electron-builder --linux --x64",
     "dist:headless": "npm run clean:dist && cross-env NODE_ENV=production HEADLESS=true node build-headless.mjs",
-    "test:unit": "vitest src"
+    "test:unit": "vitest src",
+    "test:isolation": "node scripts/test-isolation.mjs"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

@@ -2,31 +2,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { getLogDirectory } from './pathResolver';
+import { env } from './envLoader';
 
-const WRITE_LOG_TO_FILE = process.env.WRITE_LOG_TO_FILE === 'true';
-const WRITE_LOG_LEVEL = process.env.WRITE_LOG_LEVEL || 'info';
-const WRITE_LOG_MAX_FILE_COUNT = process.env.WRITE_LOG_MAX_FILE_COUNT ? parseInt(process.env.WRITE_LOG_MAX_FILE_COUNT) : 50;
-
-// Función para determinar la ubicación apropiada de logs
-const getLogDirectory = (): string => {
-    // Si se especifica una ruta en la variable de entorno, usarla
-    if (process.env.WRITE_LOG_DIR_PATH) {
-        return process.env.WRITE_LOG_DIR_PATH;
-    }
-
-    // Detectar si es desarrollo
-    const isDev = process.env.NODE_ENV === 'development';
-    if (isDev) {
-        return './logs';
-    }
-
-    // Para producción (compilado), SIEMPRE usar directorio junto al ejecutable
-    const execPath = process.execPath;
-    const execDir = path.dirname(execPath);
-    const logsPath = path.join(execDir, 'logs');
-    
-    return logsPath;
-};
+const WRITE_LOG_TO_FILE = env.WRITE_LOGS_TO_FILE;
+const WRITE_LOG_LEVEL = env.WRITE_LOG_LEVEL;
+const WRITE_LOG_MAX_FILE_COUNT = 50;
 
 const WRITE_LOG_DIR_PATH = getLogDirectory();
 
@@ -38,19 +19,18 @@ export class Log {
         this.source = source;
         this.verbose = verbose;
         
-        // Crear directorio de logs si no existe
-        if (WRITE_LOG_TO_FILE) {
-            this.ensureLogDirectory();
-            
-            // Mostrar la ubicación de logs solo para el primer logger creado
-            if (source === 'main') {
-                const absolutePath = path.resolve(WRITE_LOG_DIR_PATH);
-                const isDev = process.env.NODE_ENV === 'development';
-                console.log(`[${source}] Environment: ${isDev ? 'development' : 'production'}`);
-                console.log(`[${source}] Executable path: ${process.execPath}`);
-                console.log(`[${source}] Working directory: ${process.cwd()}`);
-                console.log(`[${source}] Logs directory: ${absolutePath}`);
-            }
+        // Crear directorio de logs siempre
+        this.ensureLogDirectory();
+        
+        // Mostrar la ubicación de logs solo para el primer logger creado
+        if (source === 'main') {
+            const absolutePath = path.resolve(WRITE_LOG_DIR_PATH);
+            const isDev = env.NODE_ENV === 'development';
+            console.log(`[${source}] Environment: ${isDev ? 'development' : 'production'}`);
+            console.log(`[${source}] Executable path: ${process.execPath}`);
+            console.log(`[${source}] Working directory: ${process.cwd()}`);
+            console.log(`[${source}] Logs directory: ${absolutePath}`);
+            console.log(`[${source}] Write logs to file: ${WRITE_LOG_TO_FILE}`);
         }
     }
 

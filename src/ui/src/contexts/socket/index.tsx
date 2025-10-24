@@ -1,63 +1,51 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 import { createContext } from "react";
+import useIpc from "../../hooks/useIpc";
+import { useLocation } from "react-router-dom";
 
-export const SocketContext = createContext<any>(null);
+interface SocketContextType {
+    socket: Socket | null;
+    isConnected: boolean;
+}
 
-export const SocketContextProvider = ({children}) => {
-    const [socket, setSocket] = useState<any>(null);
+interface SocketContextProviderProps {
+    children: React.ReactNode;
+}
+
+export const SocketContext = createContext<SocketContextType | null>(null);
+const url = 'http://localhost:3000';
+
+export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({ children }) => {
+    const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [socketUrl, setSocketUrl] = useState<string>('');
+    const location = useLocation()
+    const { authToken, contextIsolation } = useIpc() as { authToken: string, contextIsolation: boolean };
 
     useEffect(() => {
-        const initializeSocket = async () => {
-            // Detectar si estamos en desarrollo basándonos en el puerto actual
-            const currentPort = window.location.port;
-            let url: string;
-            
-            if (currentPort === '5123') {
-                // Estamos en el servidor de desarrollo de Vite
-                try {
-                    // Intentar obtener la configuración del servidor
-                    const response = await fetch('http://localhost:3000/api/config');
-                    if (response.ok) {
-                        const config = await response.json();
-                        url = `http://localhost:${config.serverPort}`;
-                    } else {
-                        // Fallback al puerto por defecto
-                        url = 'http://localhost:3000';
-                    }
-                } catch (error) {
-                    console.warn('Could not fetch server config, using default port 3000');
-                    url = 'http://localhost:3000';
-                }
-            } else {
-                // En producción, conectar al mismo host y puerto desde donde se sirve la página
-                url = `${window.location.protocol}//${window.location.host}`;
-            }
-            
-            setSocketUrl(url);
-            console.log(`Socket.IO connecting to: ${url}`);
-            
-            const newSocket = io(url, {
-                transports: ['websocket', 'polling'],
-                timeout: 5000,
-                forceNew: true
-            });
-            
-            setSocket(newSocket);
-            setIsConnected(newSocket.connected);
-        };
+        // Crear la conexión del socket
+        const newSocket = io(url, {
+            transports: ['websocket', 'polling'],
+            timeout: 5000,
+            forceNew: true
+        });
 
-        initializeSocket();
+        setSocket(newSocket);
+
+        return () => {
+            if (newSocket) {
+                newSocket.disconnect();
+            }
+        };
     }, []);
+
 
     useEffect(() => {
         if (!socket) return;
 
         const handleConnect = () => {
             setIsConnected(true);
-            console.log(`Socket connected to: ${socketUrl}`);
+            console.log(`Socket connected to: ${url}`);
         };
 
         const handleDisconnect = (reason: string) => {
@@ -82,22 +70,25 @@ export const SocketContextProvider = ({children}) => {
             socket.off("disconnect", handleDisconnect);
             socket.off("connect_error", handleConnectError);
         };
-    }, [socket, socketUrl]);
+    }, [socket]);
 
-    // Cleanup cuando el componente se desmonte
     useEffect(() => {
-        return () => {
-            if (socket) {
-                socket.disconnect();
-            }
-        };
-    }, []);
+        if (!socket) return;
 
-    return ( 
-        <SocketContext.Provider value={{socket, isConnected}}>
+        console.log (`Location changed to ${location.pathname}, updating socket auth payload`);
+        socket.auth = {
+            authToken: contextIsolation ? authToken : null,
+            currentPath: location.pathname
+        };
+    }, [authToken, contextIsolation, location.pathname, socket]);
+
+    if (!socket) 
+        return <div>Connecting to socket...</div>;
+    return (
+        <SocketContext.Provider value={{ socket, isConnected }}>
             {children}
         </SocketContext.Provider>
-     );
+    );
 }
 
 

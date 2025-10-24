@@ -1,20 +1,14 @@
 import { app } from 'electron';
 import { Log } from '@utils/log.js';
+import '@services/Ipc/index.js';
 
 const log = new Log('electronProcess', true);
 
 const electronProcess = async () => {
     app.on('ready', async () => {
 
-        const { createMainWindow } = await import('@domain/useCases/windowManager/index.js')
-        await createMainWindow({
-            enableMenuBar: false,
-            /* 
-            startFullscreen: false,
-            defaultSize: { width: 300, height: 300 },
-            defaultPosition: { x: 200, y: 200 } 
-            */
-        })
+        const { createMainWindow } = await import('@services/Windows/index.js')
+        await createMainWindow()
 
         log.info('App is ready');
 

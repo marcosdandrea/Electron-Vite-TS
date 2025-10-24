@@ -2,7 +2,8 @@ import { build } from 'esbuild';
 
 build({
     entryPoints: {
-        main: 'src/app/main.ts'
+        main: 'src/app/main.ts',
+        preload: 'scripts/preload.ts'
     },
     outdir: 'dist-electron',
     entryNames: '[name]',
@@ -25,6 +26,7 @@ build({
         'path',
         'os',
         'url',
+        'crypto',
         'dotenv/config'
     ]
 }).catch(() => process.exit(1));

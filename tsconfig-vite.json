@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist-react",
+    "outDir": "dist/headless/dist-ui",
     "module": "NodeNext",
     "jsx": "react",
     "noEmit": true,
@@ -13,9 +13,8 @@
       "@components/*": ["src/ui/components/*"],
       "@hooks/*": ["src/ui/hooks/*"],
       "@views/*": ["src/ui/views/*"],
-      "@stores/*": ["src/ui/stores/*"],
-      "@ipc/*": ["src/ui/ipc/*"],
-      "@contexts/*": ["src/ui/contexts/*"]
+      "@contexts/*": ["src/ui/contexts/*"],
+      "@utils/*": ["src/ui/utils/*"]
     },
   },
   "include": ["src/ui", "src/common"],

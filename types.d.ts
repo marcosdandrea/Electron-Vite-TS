@@ -1,7 +1,6 @@
+import { ElectronAPI } from './src/common/types/electron.types';
+
 interface Window {
-  electronAPI: {
-    send: (channel: string, data?: any) => void;
-    on: (channel: string, callback: (event: any, ...args: any[]) => void) => void;
-    once: (channel: string, callback: (event: any, ...args: any[]) => void) => void;
-  };
+  electronAPI: ElectronAPI;
+  ELECTRON_SESSION_TOKEN: string;
 }

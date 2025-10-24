@@ -1,15 +1,13 @@
 import React from 'react';
-import style from './style.module.css';
+import Navigation from './src/components/Navigation';
+import './style.module.css';
+import IpcContextProvider from './src/contexts/ipc';
 import SocketContextProvider from './src/contexts/socket';
 
 function App() {
 
     return (
-        <SocketContextProvider>
-            <div className={style.app}>
-                Everything is working!!
-            </div>
-        </SocketContextProvider>
+        <Navigation />
     );
 }
 

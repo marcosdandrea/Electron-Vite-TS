@@ -1,11 +1,13 @@
 import { getStaticDir } from '@src/utils/pathResolver';
 import { Log } from '@utils/log.js';
+import { env } from '@utils/envLoader.js';
 const log = new Log('coreProcesses', true);
 
-const coreProcesses = async () => {
-    log.info('Starting core processes...');
+const ioProcesses = async () => {
+    log.info('Starting I/O processes...');
     try {
-        const MAIN_SERVER_PORT = process.env.MAIN_SERVER_PORT ? parseInt(process.env.MAIN_SERVER_PORT) : 3000;
+
+        const MAIN_SERVER_PORT = env.MAIN_SERVER_PORT;
         
         const { init: initServer } = await import('@services/Server/index.js')
         const staticDirectory = await getStaticDir();
@@ -21,12 +23,12 @@ const coreProcesses = async () => {
         const io = await initSocket({ httpServer });
         log.info('Socket initialized.');
 
-        log.info('Core processes completed.');
+        log.info('I/O processes started successfully.');
     } catch (error) {
-        log.error('Error in core processes:', error);
+        log.error('Error starting I/O processes:', error);
         throw error;
     }
 }
 
 
-export { coreProcesses }
+export { ioProcesses }

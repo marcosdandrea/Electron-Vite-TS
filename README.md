@@ -2,6 +2,9 @@
 
 A modern Electron application boilerplate with Vite, TypeScript, React, and integrated Express server with Socket.IO support.
 
+## 📖 Documentación Completa
+Para información detallada sobre configuración, variables de entorno y arquitectura, consulta la [Documentación Completa](./DOCUMENTATION.md).
+
 ## Features
 
 - 🚀 **Electron + Vite**: Fast development and build process
@@ -198,3 +201,4 @@ For support and questions:
 - Create an issue in the GitHub repository
 - Check the documentation in the `docs/` directory
 - Review the server isolation guide: `docs/server-isolation.md`
+

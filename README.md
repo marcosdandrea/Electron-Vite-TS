@@ -1,204 +1,128 @@
 # Electron-Vite-TS Boilerplate
 
-A modern Electron application boilerplate with Vite, TypeScript, React, and integrated Express server with Socket.IO support.
+Electron + React + Vite + TypeScript boilerplate with an integrated Express + Socket.IO backend.
 
-## 📖 Documentación Completa
-Para información detallada sobre configuración, variables de entorno y arquitectura, consulta la [Documentación Completa](./DOCUMENTATION.md).
+This project is now socket-only for frontend-backend communication.
+IPC is not used in the current architecture.
 
-## Features
+## Agent Guide
 
-- 🚀 **Electron + Vite**: Fast development and build process
-- ⚡ **TypeScript**: Full type safety across the application
-- ⚛️ **React**: Modern UI framework
-- 🌐 **Express Server**: Built-in HTTP server
-- 🔌 **Socket.IO**: Real-time communication
-- 🔒 **Server Isolation**: Security feature to restrict server access
-- 📦 **Dual Mode**: Runs in both Electron and Headless modes
+Operational guide for agents and automated workflows:
+- [AGENTS.md](./AGENTS.md)
 
-## Server Isolation Feature 🔒
+Detailed reference:
+- [DOCUMENTATION.md](./DOCUMENTATION.md)
 
-### Overview
-The server isolation feature provides an additional security layer by restricting server access to localhost connections only. This is particularly useful in production environments or when you want to prevent external access to your application server.
+## Key Architecture Rules
 
-### Configuration
-Add the following environment variable to your `.env` file:
+- Communication between frontend and backend is done only through Socket.IO channels.
+- Channels are defined centrally in `src/common/channels/app.channels.ts`.
+- Frontend channel usage must go through the socket hook inside `SocketContextProvider`.
+- Backend channel endpoint handling is implemented in socket middleware.
+- User-facing UI should use Ant Design components by default.
 
-```env
-# Enable server isolation (recommended for production)
-MAIN_SERVER_ISOLATION=true
+## Main UI Flow
 
-# Disable server isolation (allows all connections)
-MAIN_SERVER_ISOLATION=false
-```
+- Default route redirects to `/main`.
+- Main view consumes interactive content and system time through socket channels.
+- Panel view is protected with password authentication from `.env`.
+- Panel can update interactive content shown in Main.
 
-### How It Works
-When `MAIN_SERVER_ISOLATION=true`:
+## Runtime Modes
 
-- **HTTP Requests**: Only requests from localhost (127.0.0.1, ::1) are accepted
-- **Socket.IO Connections**: Only WebSocket connections from localhost origins are allowed
-- **Security Logging**: All rejected connection attempts are logged
-- **Error Responses**: Rejected requests receive proper 403 Forbidden responses
-
-### Dynamic Port Configuration
-The Socket.IO connection automatically adapts to the configured server port:
-
-- **Development Mode**: Detects if running on Vite dev server (port 5123) and connects to the backend server
-- **Production Mode**: Connects to the same host and port serving the application
-- **Configuration API**: Uses `/api/config` endpoint to get the current server configuration
-
-### Testing Isolation
-Run the isolation test to verify the feature is working:
-
-```bash
-npm run test:isolation
-```
-
-This test will automatically detect the server port and isolation settings.
+- Development:
+  - Opens frontend with DevTools.
+- Production:
+  - Opens frontend without DevTools.
+- Kiosk mode (`KIOSK_MODE=true`):
+  - Opens in fullscreen kiosk by default.
 
 ## Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Core runtime variables:
 
 ```env
-# Server Configuration
-MAIN_SERVER_PORT=3000
-MAIN_SERVER_ISOLATION=true
+NODE_ENV=development
 
-# Logging Configuration
+MAIN_SERVER_PORT=43123
+VITE_DEV_PORT=5123
+VITE_MAIN_SERVER_PORT=43123
+
+PANEL_ACCESS_PASSWORD=change-me
+KIOSK_MODE=false
+
+USE_AUTHENTICATION=true
+LOCALHOST_ONLY=true
+USE_CONTEXT_ISOLATION=true
+PUBLIC_ENDPOINTS=[/public]
+
 WRITE_LOG_TO_FILE=true
 WRITE_LOG_LEVEL=info
-WRITE_LOG_DIR_PATH=logs
-WRITE_LOG_MAX_FILE_COUNT=50
+INCREMENT_PATCH_VERSION_ON_BUILD=true
 ```
 
-## Getting Started
+Notes:
+- `MAIN_SERVER_PORT` is the backend socket/http port.
+- The default port is set to `43123` (less common than `3000`).
+- In dev, `VITE_MAIN_SERVER_PORT` must point to the backend port used by the socket provider.
+- In packaged Electron builds, an external `.config` file is created next to the `.exe`.
+- When `.config` exists, its values override values from `.env`.
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+## Installed Runtime Files
 
-### Installation
+For Windows packaged installers, the app installation directory includes:
+
+- `.config` (user-editable runtime configuration)
+- `database/` (runtime data directory)
+
+Both are shipped next to the executable to allow per-install customization without rebuilding the app.
+
+## Prerequisites
+
+- Node.js 18+
+- pnpm
+
+## Setup
 
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd Electron-Vite-TS
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env
+pnpm install
 ```
 
-### Development
+Create `.env` from `.env-ref` and customize values.
 
-#### Electron Mode (Desktop Application)
+## Development
+
 ```bash
-# Start development with hot reload
-npm run dev:electron
-
-# Build for production
-npm run build:electron
-
-# Create distribution packages
-npm run dist:win    # Windows
-npm run dist:mac    # macOS
-npm run dist:linux  # Linux
+pnpm run dev:electron
+pnpm run dev:headless
+pnpm run dev:react
 ```
 
-#### Headless Mode (Server Only)
+## Build
+
 ```bash
-# Start headless development
-npm run dev:headless
-
-# Build headless for production
-npm run build:headless
+pnpm run build:vite
+pnpm run build:electron
+pnpm run build:headless
 ```
 
-#### React Only (UI Development)
+## Distribution
+
 ```bash
-# Start Vite dev server for UI development
-npm run dev:react
+pnpm run dist:win
+pnpm run dist:mac
+pnpm run dist:linux
+pnpm run dist:headless
 ```
 
-## Project Structure
+## Important Source Paths
 
-```
-src/
-├── app/                    # Main application logic
-│   ├── main.ts            # Application entry point
-│   └── src/
-│       ├── domain/        # Business logic
-│       ├── main/          # Core processes
-│       ├── services/      # Server and Socket.IO services
-│       └── utils/         # Utilities and helpers
-├── common/                # Shared types and utilities
-├── ui/                    # React frontend
-│   ├── App.tsx           # Main React component
-│   ├── main.tsx          # React entry point
-│   └── src/              # UI components and logic
-└── types.d.ts            # Global type definitions
-```
-
-## Security Features
-
-### Server Isolation
-- Configurable localhost-only access
-- HTTP and WebSocket protection
-- Connection attempt logging
-- Production-ready security
-
-### Best Practices
-1. Enable `MAIN_SERVER_ISOLATION=true` in production
-2. Monitor logs for rejected connection attempts
-3. Use HTTPS in production environments
-4. Regularly update dependencies
-
-## Scripts Reference
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev:electron` | Start Electron development mode |
-| `npm run dev:headless` | Start headless development mode |
-| `npm run dev:react` | Start React development server |
-| `npm run build:electron` | Build Electron application |
-| `npm run build:headless` | Build headless application |
-| `npm run build:vite` | Build React frontend |
-| `npm run dist:win` | Create Windows distribution |
-| `npm run dist:mac` | Create macOS distribution |
-| `npm run dist:linux` | Create Linux distribution |
-| `npm run test:isolation` | Test server isolation feature |
-
-## Architecture
-
-### Core Processes
-1. **Server Initialization**: Express server with static file serving
-2. **Socket.IO Setup**: Real-time communication layer
-3. **Window Management**: Electron window lifecycle management
-4. **Security Layer**: Optional server isolation
-
-### Communication Flow
-```
-React UI ↔ Socket.IO ↔ Express Server ↔ Electron Main Process
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support and questions:
-- Create an issue in the GitHub repository
-- Check the documentation in the `docs/` directory
-- Review the server isolation guide: `docs/server-isolation.md`
-
+- `src/common/channels/app.channels.ts`
+- `src/app/src/services/Socket/middlewares/channels.middleware.ts`
+- `src/ui/src/contexts/socket/index.tsx`
+- `src/ui/src/hooks/useSocketChannel/index.tsx`
+- `src/ui/src/views/Main/index.tsx`
+- `src/ui/src/views/Panel/index.tsx`
+- `src/app/src/services/Windows/WindowManager.ts`

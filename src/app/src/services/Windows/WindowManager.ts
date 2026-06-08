@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import path from "path";
 import { BrowserWindow } from "electron";
 import { Log } from "@utils/log.js";
 import { env } from "@utils/envLoader.js";
@@ -38,20 +37,6 @@ export class WindowManager {
         return WindowManager.instance;
     }
 
-    private getPreloadPath(): string {
-        // En desarrollo, el preload está en dist-electron
-        // En producción empaquetada, está en el mismo directorio que main.js
-        const isDev = env.NODE_ENV === 'development';
-
-        if (isDev) {
-            // Desarrollo: preload está en dist-electron junto con main.js
-            return path.join(__dirname, 'preload.js');
-        } else {
-            // Producción: preload está empaquetado en el asar junto con main.js
-            return path.join(__dirname, 'preload.js');
-        }
-    }
-
     createWindow(options: createWindowOptions): Promise<BrowserWindow> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -68,9 +53,8 @@ export class WindowManager {
                     webPreferences: {
                         nodeIntegration: false,
                         contextIsolation: true,
-                        preload: this.getPreloadPath(),
                         webSecurity: true,
-                        sandbox: false // Necesario para que el preload funcione
+                        sandbox: true
                     }
                 });
                 this.windows.set(id, window);
@@ -83,7 +67,8 @@ export class WindowManager {
 
                 const IS_DEV = env.NODE_ENV === "development";
                 const MAIN_SERVER_PORT = env.MAIN_SERVER_PORT;
-                const VITE_PORT = 5123; // El puerto de Vite no está en env, usar valor por defecto
+                const VITE_PORT = env.VITE_DEV_PORT;
+                const KIOSK_MODE = env.KIOSK_MODE;
 
                 const baseUrl = "http://localhost:"
                 let port = IS_DEV ? VITE_PORT : MAIN_SERVER_PORT;
@@ -97,6 +82,17 @@ export class WindowManager {
                 });
 
                 window.once('ready-to-show', () => {
+                    if (IS_DEV) {
+                        window.webContents.openDevTools({ mode: 'detach' });
+                    }
+
+                    if (!IS_DEV && KIOSK_MODE) {
+                        window.setKiosk(true);
+                        window.setFullScreen(true);
+                        window.show();
+                        return;
+                    }
+
                     if (options.fullscreen) {
                         window.setFullScreen(true);
                     } else {

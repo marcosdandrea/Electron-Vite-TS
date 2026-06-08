@@ -1,16 +1,16 @@
 import APP_TOKENS from '@common/tokens/app.tokens';
 import { Log } from '@utils/log.js';
 import { env } from '@utils/envLoader.js';
-import { Socket, ExtendedError } from 'socket.io';
+import { Socket } from 'socket.io';
 
 const log = new Log('SocketIsolationMiddleware', true);
 const useContextIsolation = env.USE_CONTEXT_ISOLATION;
 
-export const contextIsolationMiddleware = async (socket: Socket, next: (middleware: Socket | Error) => void) => {
+export const contextIsolationMiddleware = async (socket: Socket, next: (error?: Error) => void) => {
     console.log (`New client connected: ${socket.id}`);
 
     if (!useContextIsolation) {
-        return next(socket);
+        return next();
     }
 
     // Obtenemos información de la ruta desde el cliente (React Router)
@@ -35,12 +35,12 @@ export const contextIsolationMiddleware = async (socket: Socket, next: (middlewa
     }
 
     // Definimos rutas públicas que no requieren autenticación
-    const publicPaths = ['/public', '/about'];
+    const publicPaths = ['/', '/main', '/panel', '/public', '/about'];
     const isPublicPath = publicPaths.includes(currentPath);
 
     if (isPublicPath) {
         log.info(`Public path accessed: ${currentPath} - allowing connection without auth`);
-        return next(socket);
+        return next();
     }
 
     log.info(`Socket connection attempt from endpoint: ${socket.handshake.address}, Current path: ${currentPath}, URL: ${url}, Origin: ${origin}`);
@@ -62,5 +62,5 @@ export const contextIsolationMiddleware = async (socket: Socket, next: (middlewa
     log.info(`Context isolation enabled - valid auth token for protected path: ${currentPath}`);
 
 
-    next(socket);
+    next();
 };

@@ -1,6 +1,5 @@
 import { app } from 'electron';
 import { Log } from '@utils/log.js';
-import '@services/Ipc/index.js';
 
 const log = new Log('electronProcess', true);
 

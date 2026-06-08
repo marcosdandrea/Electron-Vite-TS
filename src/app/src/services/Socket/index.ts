@@ -4,7 +4,7 @@ import { Log } from '@utils/log.js';
 import { env } from '@utils/envLoader.js';
 import { contextIsolationMiddleware } from './middlewares/isolation.middleware';
 import { authenticationMiddleware } from './middlewares/authentication.middleware';
-import { appListeners } from './listeners/app.listeners';
+import { channelsMiddleware } from './middlewares/channels.middleware';
 
 const log = new Log('socket', true);
 
@@ -43,12 +43,14 @@ const init = async ({ httpServer, cors }: { httpServer: Server, cors?: any }) =>
             const io = new Server(httpServer, {cors: corsConfig});          
 
             //para autenticar usuarios de aplicación
-            io.use(authenticationMiddleware) 
+            io.use(authenticationMiddleware)
+            io.use(channelsMiddleware)
 
-            // Registrar listeners
-            io.on("connection", 
-                (socket) => 
-                    contextIsolationMiddleware(socket, appListeners));
+            io.on('connection', (socket) => {
+                contextIsolationMiddleware(socket, () => {
+                    log.info(`Socket client connected: ${socket.id}`);
+                });
+            });
 
             resolve(io);
         } catch (error) {

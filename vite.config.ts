@@ -38,7 +38,6 @@ export default defineConfig(({ mode }) => {
         "@hooks": path.resolve(__dirname, 'src/ui/hooks'),
         "@views": path.resolve(__dirname, 'src/ui/views'),
         "@stores": path.resolve(__dirname, 'src/ui/stores'),
-        "@ipc": path.resolve(__dirname, 'src/ui/ipc'),
         "@utils": path.resolve(__dirname, 'src/ui/utils'),
         "@contexts": path.resolve(__dirname, 'src/ui/contexts'),
       },

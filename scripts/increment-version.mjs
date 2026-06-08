@@ -11,7 +11,8 @@ const rootDir = join(__dirname, '..');
 dotenv.config({ path: join(rootDir, '.env') });
 
 // Leer la bandera
-const shouldIncrement = process.env.INCREMENT_PATCH_VERSION_ON_BUILD === 'true';
+const forceIncrement = process.argv.includes('--force');
+const shouldIncrement = forceIncrement || process.env.INCREMENT_PATCH_VERSION_ON_BUILD === 'true';
 
 if (!shouldIncrement) {
     console.log('[increment-version] INCREMENT_PATCH_VERSION_ON_BUILD is disabled. Skipping version increment.');

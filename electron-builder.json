@@ -2,6 +2,16 @@
   "appId": "com.marcosdandrea.boilerplate",
   "productName": "Boilerplate",
   "files": ["dist-electron", "dist-ui", ".env"],
+  "extraFiles": [
+    {
+      "from": "resources/runtime/.config",
+      "to": ".config.default"
+    },
+    {
+      "from": "resources/runtime/database",
+      "to": "database.default"
+    }
+  ],
   "icon": "./resources/icon/icon.ico",
   "asar": true,
   "mac": {
@@ -19,11 +29,10 @@
       {
         "target": "nsis",
         "arch": ["x64"]
-      },
-      {
-        "target": "dir",
-        "arch": ["x64"]
       }
     ]
+  },
+  "nsis": {
+    "include": "build/installer.nsh"
   }
 }
